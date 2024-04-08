@@ -2,7 +2,7 @@ import requests
 import uuid
 import json
 
-auth = 'Значения Client Id и Client Secret'
+auth = 'token'
 
 def get_token(auth_token, scope='GIGACHAT_API_PERS'):
     # Создадим идентификатор UUID (36 знаков)
@@ -38,7 +38,7 @@ if response != 1:
   giga_token = response.json()['access_token']'''
 
 
-def get_message(auth_token, user_message):
+async def get_message(auth_token, user_message):
     # URL API, к которому мы обращаемся
     url = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
 
@@ -76,7 +76,7 @@ def get_message(auth_token, user_message):
         print(f"Произошла ошибка: {str(e)}")
         return -1
 
-def get_message_history(auth_token, user_message, conversation_history=None):
+async def get_message_history(auth_token, user_message, conversation_history=None):
     # URL API, к которому мы обращаемся
     url = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
 
