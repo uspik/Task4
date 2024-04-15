@@ -84,10 +84,12 @@ async def get_message_history(auth_token, user_message, conversation_history=Non
     if conversation_history is None:
         conversation_history = []
 
+    message = f'Представь, что ты профессиональный юрист. Ответь на мой вопрос "{user_message}"'
+
     # Добавляем сообщение пользователя в историю диалога
     conversation_history.append({
         "role": "user",
-        "content": user_message
+        "content": message
     })
 
     # Подготовка данных запроса в формате JSON
