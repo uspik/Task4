@@ -1,6 +1,5 @@
 from flask import Flask, request
 from main import get_token, auth, get_message_history
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import asyncio
 import json
 import time
@@ -37,4 +36,4 @@ def refresh():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=4567)
+    app.run(host='0.0.0.0', port=4567, ssl_context="adhoc")
