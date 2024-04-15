@@ -2,7 +2,7 @@ import requests
 import uuid
 import json
 
-auth = 'token'
+auth = 'TOKEN'
 
 def get_token(auth_token, scope='GIGACHAT_API_PERS'):
     # Создадим идентификатор UUID (36 знаков)
@@ -84,7 +84,7 @@ async def get_message_history(auth_token, user_message, conversation_history=Non
     if conversation_history is None:
         conversation_history = []
 
-    message = f'Представь, что ты профессиональный юрист. Ответь на мой вопрос "{user_message}"'
+    message = f'Представь, что ты профессиональный юрист, я твой клиент, который обратился к тебе за помощью. Ответь на мой вопрос: "{user_message}"'
 
     # Добавляем сообщение пользователя в историю диалога
     conversation_history.append({
