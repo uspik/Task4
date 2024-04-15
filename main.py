@@ -130,6 +130,7 @@ async def get_message_history(auth_token, user_message, conversation_history=Non
         # Обработка исключения в случае ошибки запроса
         #print(f"Произошла ошибка: {str(e)}")
         return None, conversation_history
+
 '''
 conversation_history = []
 response, conversation_history = get_message_history(giga_token, "Привет, как дела?", conversation_history)
