@@ -125,7 +125,7 @@ async def get_message_history(auth_token, user_message, conversation_history=Non
         })
         #print(response_data['choices'][0]['message']['content'])
 
-        return response, conversation_history
+        return response_data['choices'][0]['message']['content'], conversation_history
     except requests.RequestException as e:
         # Обработка исключения в случае ошибки запроса
         #print(f"Произошла ошибка: {str(e)}")

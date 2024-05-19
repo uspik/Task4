@@ -36,14 +36,21 @@ async def give_greeting():
         async with lock:
             refresh()
     request_data = request.form  # Получаем JSON из тела запроса
-    history = json.loads(request_data.get('history'))
-    if history is None or len(history) == 0:
-        conversation_history = None
-    else:
-        conversation_history = history
-    response, conversation_history = await get_message_history(giga_token, conversation_history)
-    response_data = response.json()
-    return json.dumps(response_data['choices'][0]['message'])
+    user_id, chat_id = int(request.form['user_id']), int(request.form['chat_id'])
+    question = request.form['question']
+    #history = json.loads(request_data.get('history'))
+    try:
+        file_pass, conversation_history = await load_data(user_id, chat_id)
+        conversation_history = ast.literal_eval(conversation_history)
+    except IndexError:
+        await upload_data(user_id, "", "[]", chat_id)
+        conversation_history = []
+    except Exception as Ex:
+        print(Ex)
+    response, conversation_history = await get_message_history(giga_token, question, conversation_history)
+    conversation_history = str(conversation_history)
+    await update_data(user_id, conversation_history, chat_id)
+    return response
 async def allowed_image(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_IMAGE
 async def allowed_file_doc(filename):
@@ -75,13 +82,13 @@ async def upload_file():
                 chat_history = str(chat_history)
                 answer_AI, chat_history = await send_with_doc(file_to_txt, question, chat_history)
                 chat_history = str(chat_history)
-                upload_data(user_id, file_to_txt, chat_history, chat_id)
+                await upload_data(user_id, file_to_txt, chat_history, chat_id)
                 return answer_AI
         else:
-            file_to_txt, chat_history = load_data(user_id, chat_id)
+            file_to_txt, chat_history = await load_data(user_id, chat_id)
             answer_AI, chat_history = await send_with_doc(file_to_txt, question, chat_history)
             chat_history = str(chat_history)
-            update_data(user_id, chat_history, chat_id)
+            await update_data(user_id, chat_history, chat_id)
             return answer_AI
 
             #filename = 'image.jpg'
