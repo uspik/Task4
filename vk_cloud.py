@@ -1,5 +1,7 @@
 import requests
 import docx
+from pdf2image import convert_from_bytes
+import io
 
 def get_access_token(client_id, refresh_token):
     url = "https://mcs.mail.ru/auth/oauth/v1/token"
@@ -46,5 +48,15 @@ async def getText(file):
         fullText.append(para.text)
     return '\n'.join(fullText)
 
-access_token = "21yMduMsxvKnVZgDr1hrvfPe3JoKkjsrSjLs3ouZaDiNs4opMt"
+async def pdf_to_img(file, access_token):
+    images = convert_from_bytes(pdf_file=file.read())
+    output_str = ''
+    for image in images:
+        img_byte_arr = io.BytesIO()
+        image.save(img_byte_arr, format='PNG')
+        img_byte_arr = img_byte_arr.getvalue()
+        output_str += await send_image(img_byte_arr, access_token)
+    return output_str
+access_token = "6QNmzdpQrmR3wavR8WphKDjiDq8Uaf2FBUvRkWbBdCLNvRNZw"
+
 # {'refresh_token': '2JZfPKgXiBL1zqijvk85yS5aadLgvYLUrstURL2EWjDiSMoWFS', 'access_token': 'b5oqfPZC1VSejggxuQtQfukfzhtBy6Nn8U4kTfngqRYG9xDak', 'expired_in': '3600', 'scope': {'objects': 1, 'video': 1, 'persons': 1}}

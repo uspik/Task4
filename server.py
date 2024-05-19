@@ -5,7 +5,7 @@ import asyncio
 import json
 import time
 import os
-from vk_cloud import access_token, send_image, getText
+from vk_cloud import access_token, send_image, getText, pdf_to_img
 from flask import Flask, flash, request, redirect, url_for
 from with_history import send_with_doc
 from sql import upload_data, load_data, update_data
@@ -13,8 +13,9 @@ import ast
 from werkzeug.utils import secure_filename
 
 UPLOAD_FOLDER = 'C:/Users/User1/PycharmProjects/Task4/download-files'
-ALLOWED_EXTENSIONS_IMAGE = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS_IMAGE = set(['txt', 'png', 'jpg', 'jpeg', 'gif'])
 ALLOWED_EXTENSIONS_DOC = set(['doc', 'docx'])
+ALLOWED_PDF = set(['pdf'])
 
 
 app = Flask(__name__)
@@ -47,6 +48,8 @@ async def allowed_image(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_IMAGE
 async def allowed_file_doc(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_DOC
+async def allowed_pdf(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_PDF
 @app.route('/api/send-file', methods = ['POST'])
 async def upload_file():
     if request.method == 'POST':
@@ -61,11 +64,13 @@ async def upload_file():
             if file.filename == '':
                 flash('No selected file')
                 return redirect(request.url)
-            if file and (await allowed_image(file.filename) or await allowed_file_doc(file.filename)):
+            if file and (await allowed_image(file.filename) or await allowed_file_doc(file.filename) or await  allowed_pdf(file.filename)):
                 if await allowed_image(file.filename):
                     file_to_txt = await send_image(file, access_token)
                 elif await allowed_file_doc(file.filename):
                     file_to_txt = await getText(file)
+                elif await  allowed_pdf(file.filename):
+                    file_to_txt = await pdf_to_img(file, access_token)
                 chat_history = []
                 chat_history = str(chat_history)
                 answer_AI, chat_history = await send_with_doc(file_to_txt, question, chat_history)
