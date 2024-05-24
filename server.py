@@ -5,7 +5,7 @@ import asyncio
 import json
 import time
 import os
-from vk_cloud import access_token, send_image, getText, pdf_to_img
+from vk_cloud import  send_image, getText, pdf_to_img
 from flask import Flask, flash, request, redirect, url_for
 from with_history import send_with_doc
 from sql import upload_data, load_data, update_data
@@ -73,11 +73,11 @@ async def upload_file():
                 return redirect(request.url)
             if file and (await allowed_image(file.filename) or await allowed_file_doc(file.filename) or await  allowed_pdf(file.filename)):
                 if await allowed_image(file.filename):
-                    file_to_txt = await send_image(file, access_token)
+                    file_to_txt = await send_image(file)
                 elif await allowed_file_doc(file.filename):
                     file_to_txt = await getText(file)
                 elif await  allowed_pdf(file.filename):
-                    file_to_txt = await pdf_to_img(file, access_token)
+                    file_to_txt = await pdf_to_img(file)
                 chat_history = []
                 chat_history = str(chat_history)
                 answer_AI, chat_history = await send_with_doc(file_to_txt, question, chat_history)

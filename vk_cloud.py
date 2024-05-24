@@ -1,8 +1,13 @@
+import time
+
 import requests
 import docx
 from pdf2image import convert_from_bytes
 import io
-
+import asyncio
+lock = asyncio.Lock()
+access_token = "6QNmzdpQrmR3wavR8WphKDjiDq8Uaf2FBUvRkWbBdCLNvRNZw"
+token_expired = 0
 def get_access_token(client_id, refresh_token):
     url = "https://mcs.mail.ru/auth/oauth/v1/token"
     headers = {
@@ -19,8 +24,12 @@ def get_access_token(client_id, refresh_token):
 client_id = "mcs9064514905.ml.vision.3Yzx3KihTHQ5NjsZuVr2w"
 client_secret = "B1ckyuc8AXL7QhBNWGqKWz5F4gEFW5wE6kZ4SwnjFSRxbpp67ZbCPh7zYUjD1"
 refresh_token = "2JZfPKgXiBL1zqijvk85yS5aadLgvYLUrstURL2EWjDiSMoWFS"
-#print(get_access_token(client_id, refresh_token))
-async def send_image(file, access_token):
+print(get_access_token(client_id, refresh_token))
+async def send_image(file):
+    global token_expired, access_token
+    if round(time.time() * 1000) >= token_expired:
+            async with lock:
+                refresh_tok()
     url = f'https://smarty.mail.ru/api/v1/text/recognize?oauth_token={access_token}&oauth_provider=mcs'
 
     headers = {
@@ -48,7 +57,8 @@ async def getText(file):
         fullText.append(para.text)
     return '\n'.join(fullText)
 
-async def pdf_to_img(file, access_token):
+async def pdf_to_img(file):
+    global access_token
     images = convert_from_bytes(pdf_file=file.read())
     output_str = ''
     for image in images:
@@ -57,6 +67,14 @@ async def pdf_to_img(file, access_token):
         img_byte_arr = img_byte_arr.getvalue()
         output_str += await send_image(img_byte_arr, access_token)
     return output_str
-access_token = "6QNmzdpQrmR3wavR8WphKDjiDq8Uaf2FBUvRkWbBdCLNvRNZw"
+
+
+def refresh_tok():
+    global access_token, token_expired
+    access_token = get_access_token(client_id, refresh_token)['access_token']
+    token_expired = time.time() + 3600
+    return
+
+refresh_tok()
 
 # {'refresh_token': '2JZfPKgXiBL1zqijvk85yS5aadLgvYLUrstURL2EWjDiSMoWFS', 'access_token': 'b5oqfPZC1VSejggxuQtQfukfzhtBy6Nn8U4kTfngqRYG9xDak', 'expired_in': '3600', 'scope': {'objects': 1, 'video': 1, 'persons': 1}}
