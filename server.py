@@ -66,6 +66,7 @@ async def upload_file():
         # submit a empty part without filename
         user_id, chat_id = int(request.form['user_id']), int(request.form['chat_id'])
         question = request.form['question']
+        analysis = bool(request.form['analysis'])
         if 'file' in request.files:
             file = request.files['file']
             if file.filename == '':
@@ -80,13 +81,13 @@ async def upload_file():
                     file_to_txt = await pdf_to_img(file)
                 chat_history = []
                 chat_history = str(chat_history)
-                answer_AI, chat_history = await send_with_doc(file_to_txt, question, chat_history)
+                answer_AI, chat_history = await send_with_doc(file_to_txt, question, chat_history, analysis)
                 chat_history = str(chat_history)
                 await upload_data(user_id, file_to_txt, chat_history, chat_id)
                 return answer_AI
         else:
             file_to_txt, chat_history = await load_data(user_id, chat_id)
-            answer_AI, chat_history = await send_with_doc(file_to_txt, question, chat_history)
+            answer_AI, chat_history = await send_with_doc(file_to_txt, question, chat_history, analysis)
             chat_history = str(chat_history)
             await update_data(user_id, chat_history, chat_id)
             return answer_AI
