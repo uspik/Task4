@@ -47,7 +47,7 @@ async def give_greeting():
         conversation_history = []
     except Exception as Ex:
         print(Ex)
-    response, conversation_history = await get_message_history(giga_token, question, conversation_history)
+    response, conversation_history, token_used = await get_message_history(giga_token, question, conversation_history)
     conversation_history = str(conversation_history)
     await update_data(user_id, conversation_history, chat_id)
     return response
@@ -73,21 +73,23 @@ async def upload_file():
                 flash('No selected file')
                 return redirect(request.url)
             if file and (await allowed_image(file.filename) or await allowed_file_doc(file.filename) or await  allowed_pdf(file.filename)):
+                vk_tokens = 0
                 if await allowed_image(file.filename):
                     file_to_txt = await send_image(file)
+                    vk_tokens = 1
                 elif await allowed_file_doc(file.filename):
-                    file_to_txt = await getText(file)
+                    file_to_txt, vk_tokens = await getText(file)
                 elif await  allowed_pdf(file.filename):
-                    file_to_txt = await pdf_to_img(file)
+                    file_to_txt, vk_tokens = await pdf_to_img(file)
                 chat_history = []
                 chat_history = str(chat_history)
-                answer_AI, chat_history = await send_with_doc(file_to_txt, question, chat_history, analysis)
+                answer_AI, chat_history, embend_tokens, all_tokens = await send_with_doc(file_to_txt, question, chat_history, analysis)
                 chat_history = str(chat_history)
                 await upload_data(user_id, file_to_txt, chat_history, chat_id)
                 return answer_AI
         else:
             file_to_txt, chat_history = await load_data(user_id, chat_id)
-            answer_AI, chat_history = await send_with_doc(file_to_txt, question, chat_history, analysis)
+            answer_AI, chat_history, embend_tokens, all_tokens = await send_with_doc(file_to_txt, question, chat_history, analysis)
             chat_history = str(chat_history)
             await update_data(user_id, chat_history, chat_id)
             return answer_AI

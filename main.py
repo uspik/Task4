@@ -37,7 +37,7 @@ def get_token(auth_token, scope='GIGACHAT_API_PERS'):
 if response != 1:
   giga_token = response.json()['access_token']'''
 
-
+"""
 async def get_message(auth_token, user_message):
     # URL API, к которому мы обращаемся
     url = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
@@ -74,7 +74,7 @@ async def get_message(auth_token, user_message):
     except requests.RequestException as e:
         # Обработка исключения в случае ошибки запроса
         print(f"Произошла ошибка: {str(e)}")
-        return -1
+        return -1"""
 
 async def get_message_history(auth_token, user_message, conversation_history=None):
     # URL API, к которому мы обращаемся
@@ -116,6 +116,7 @@ async def get_message_history(auth_token, user_message, conversation_history=Non
     try:
         response = requests.post(url, headers=headers, data=payload, verify=False)
         response_data = response.json()
+        token_used = response_data['usage']['total_tokens']
         #print(response_data)
 
         # Добавляем ответ модели в историю диалога
@@ -125,13 +126,8 @@ async def get_message_history(auth_token, user_message, conversation_history=Non
         })
         #print(response_data['choices'][0]['message']['content'])
 
-        return response_data['choices'][0]['message']['content'], conversation_history
+        return response_data['choices'][0]['message']['content'], conversation_history, token_used
     except requests.RequestException as e:
         # Обработка исключения в случае ошибки запроса
         #print(f"Произошла ошибка: {str(e)}")
         return None, conversation_history
-
-'''
-conversation_history = []
-response, conversation_history = get_message_history(giga_token, "Привет, как дела?", conversation_history)
-print(response.text)'''
